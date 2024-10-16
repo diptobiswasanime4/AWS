@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
   const [file, setFile] = useState([]);
-  async function upload() {
-    console.log(file);
+  const [curFile, setCurFile] = useState("");
 
-    const fileName = file.name;
-    const fileType = file.type;
+  useEffect(() => {
+    console.log(curFile);
+    console.log(
+      "https://s3.amazonaws.com/nodejssdk.bucket2.diptobiswas/" + curFile
+    );
+  }, [curFile]);
+
+  async function upload() {
+    let fileName = file.name;
+    let fileType = file.type;
+
+    fileName = fileName + `_${Math.floor(Math.random() * 1000)}`;
 
     try {
       const resp = await fetch(
@@ -16,13 +25,13 @@ function App() {
       const data = await resp.json();
       const { url } = data;
 
-      console.log(url);
-
       await axios.put(url, file, {
         headers: {
           "Content-Type": fileType,
         },
       });
+
+      setCurFile(fileName);
     } catch (error) {
       console.log(error);
     }
@@ -45,7 +54,13 @@ function App() {
             Upload
           </button>
         </div>
-        <img className="py-8" src="" alt="img" />
+        <img
+          className="my-8 border-2 rounded-full"
+          src={
+            "https://s3.amazonaws.com/nodejssdk.bucket2.diptobiswas/" + curFile
+          }
+          alt="img"
+        />
       </div>
     </div>
   );
