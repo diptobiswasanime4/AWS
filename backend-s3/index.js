@@ -12,6 +12,7 @@ AWS.config.update({
 const s3 = new AWS.S3();
 const ec2 = new AWS.EC2();
 const iam = new AWS.IAM();
+const dynamoDB = new AWS.DynamoDB();
 
 async function listAllBuckets() {
   try {
@@ -49,7 +50,17 @@ async function getUserDetails() {
   }
 }
 
+async function getDynamoDBInfo() {
+  try {
+    const res = await dynamoDB.listTables.promise();
+    console.log("DynamoDB Table Info", res.TableNames);
+  } catch (error) {
+    console.log("Error getting User details", error);
+  }
+}
+
 listAllBuckets();
 // createBucket("nodejssdk.bucket2.diptobiswas")
 describeInstances();
 getUserDetails();
+getDynamoDBInfo();
