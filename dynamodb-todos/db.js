@@ -8,7 +8,7 @@ AWS.config.update({
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
-const TABLE_NAME = "Todos";
+const TABLE_NAME = "TodoTable";
 
 export async function addItem(item) {
   const params = {
@@ -19,75 +19,60 @@ export async function addItem(item) {
     const resp = await dynamoDB.put(params).promise();
     console.log(resp);
   } catch (error) {
-    console.log("Error adding Item", error);
+    console.log("Error adding item to DB", error);
   }
 }
 
-export const getItem = async (key) => {
-  const params = {
-    TableName: TABLE_NAME,
-    Key: key,
-  };
-  let todo;
-  try {
-    const data = await dynamoDB.get(params).promise();
-    todo = data.Item;
-    console.log("Item retrieved:", data.Item);
-  } catch (error) {
-    console.error("Error retrieving item:", error);
-  }
-  return todo;
-};
-
-export const getAllItems = async () => {
+export async function getAllItems() {
   const params = {
     TableName: TABLE_NAME,
   };
   let todos;
   try {
-    // Perform the scan operation
-    const scanResult = await dynamoDB.scan(params).promise();
-    todos = scanResult.Items;
+    const res = await dynamoDB.scan(params).promise();
+    todos = res.Items;
 
-    // Output the retrieved items
-    console.log("All Items:", JSON.stringify(todos, null, 2));
+    console.log(todos);
   } catch (error) {
-    console.error("Error retrieving items:", error);
+    console.log("Error retrieving items", error);
   }
   return todos;
-};
+}
 
-export async function getTableInfo() {
+export async function getItem(todoId) {
   const params = {
     TableName: TABLE_NAME,
+    Key: todoId,
   };
+  let todo;
   try {
-    const resp = await dynamoDB.describeTable(params).promise();
-    console.log("Table info", JSON.stringify(resp.table, null, 2));
+    const res = await dynamoDB.get(params).promise();
+    todo = res.Item;
+    console.log(todo);
   } catch (error) {
-    console.log("Error retrieving table info", error);
+    console.log("Error retrieving item", error);
   }
+  return todo;
 }
 
 export async function editItem(todoId, updates) {
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      TodoId: todoId, // Assuming 'TodoId' is the primary key for the Todos table
+      TodoId: todoId,
     },
     UpdateExpression: "set TodoName = :name, Completed = :completed",
     ExpressionAttributeValues: {
       ":name": updates.TodoName,
       ":completed": updates.Completed,
     },
-    ReturnValues: "UPDATED_NEW", // Returns the updated attributes
+    ReturnValues: "UPDATED_NEW",
   };
-
   try {
-    const resp = await dynamoDB.update(params).promise();
-    console.log("Item updated:", resp.Attributes);
+    const res = await dynamoDB.update(params).promise();
+    console.log(res);
   } catch (error) {
-    console.error("Error updating item:", error);
+    console.log(error);
   }
 }
 
@@ -95,14 +80,13 @@ export async function deleteItem(todoId) {
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      TodoId: todoId, // Primary key for deletion
+      TodoId: todoId,
     },
   };
-
   try {
-    const resp = await dynamoDB.delete(params).promise();
-    console.log("Item deleted:", resp);
+    const res = await dynamoDB.delete(params).promise();
+    console.log(res);
   } catch (error) {
-    console.error("Error deleting item:", error);
+    console.log(error);
   }
 }
