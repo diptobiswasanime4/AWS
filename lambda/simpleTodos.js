@@ -1,11 +1,12 @@
+let todos = [
+  {
+    id: 1,
+    name: "todo 1",
+    completed: false,
+  },
+];
+
 export const handler = async (event) => {
-  let todos = [
-    {
-      id: 1,
-      name: "todo 1",
-      completed: false,
-    },
-  ];
   let resp;
 
   const { httpMethod, pathParameters, body } = event;
